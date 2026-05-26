@@ -1,0 +1,159 @@
+version: '3.8'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Redis Auto-Cluster stack
+#
+# Six INDEPENDENT Redis instances (no built-in replication).
+# The Python ClusterManager decides master/replica roles, handles failover,
+# and distributes entity types automatically.
+#
+# Monitoring:
+#   Grafana   → http://localhost:3000   (admin / admin)
+#   Prometheus → http://localhost:9090
+#   API docs  → http://localhost:8000/docs
+#   Topology  → http://localhost:8000/cluster/topology
+#   Live WS   → ws://localhost:8000/ws/monitor
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Redis nodes ─────────────────────────────────────────────────────────────
+  redis-1:
+    image: redis:7-alpine
+    container_name: redis-1
+    ports: ["6379:6379"]
+    command: redis-server --port 6379 --appendonly yes --loglevel warning
+    volumes: [redis-1-data:/data]
+    networks: [cluster-net]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6379", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis-2:
+    image: redis:7-alpine
+    container_name: redis-2
+    ports: ["6380:6380"]
+    command: redis-server --port 6380 --appendonly yes --loglevel warning
+    volumes: [redis-2-data:/data]
+    networks: [cluster-net]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6380", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis-3:
+    image: redis:7-alpine
+    container_name: redis-3
+    ports: ["6381:6381"]
+    command: redis-server --port 6381 --appendonly yes --loglevel warning
+    volumes: [redis-3-data:/data]
+    networks: [cluster-net]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6381", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis-4:
+    image: redis:7-alpine
+    container_name: redis-4
+    ports: ["6382:6382"]
+    command: redis-server --port 6382 --appendonly yes --loglevel warning
+    volumes: [redis-4-data:/data]
+    networks: [cluster-net]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6382", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis-5:
+    image: redis:7-alpine
+    container_name: redis-5
+    ports: ["6383:6383"]
+    command: redis-server --port 6383 --appendonly yes --loglevel warning
+    volumes: [redis-5-data:/data]
+    networks: [cluster-net]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6383", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis-6:
+    image: redis:7-alpine
+    container_name: redis-6
+    ports: ["6384:6384"]
+    command: redis-server --port 6384 --appendonly yes --loglevel warning
+    volumes: [redis-6-data:/data]
+    networks: [cluster-net]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6384", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── FastAPI application ──────────────────────────────────────────────────────
+  api:
+    build: .
+    container_name: redis-cluster-api
+    ports: ["8000:8000"]
+    environment:
+      # Inside Docker each container is reachable by its service name on port 6379
+      # (each Redis listens internally on its configured port, mapped to different
+      #  host ports — we reference them by container-internal addresses here)
+      - BOOTSTRAP_NODES=redis-1:6379,redis-2:6380,redis-3:6381,redis-4:6382,redis-5:6383,redis-6:6384
+    depends_on:
+      redis-1: { condition: service_healthy }
+      redis-2: { condition: service_healthy }
+      redis-3: { condition: service_healthy }
+    networks: [cluster-net]
+    restart: unless-stopped
+
+  # ── Prometheus ───────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports: ["9090:9090"]
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+    networks: [cluster-net]
+    restart: unless-stopped
+
+  # ── Grafana ──────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports: ["3000:3000"]
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana-provisioning:/etc/grafana/provisioning
+    depends_on: [prometheus]
+    networks: [cluster-net]
+    restart: unless-stopped
+
+volumes:
+  redis-1-data:
+  redis-2-data:
+  redis-3-data:
+  redis-4-data:
+  redis-5-data:
+  redis-6-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  cluster-net:
+    driver: bridge
