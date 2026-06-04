@@ -56,7 +56,7 @@ export default function DashboardPage() {
           />
           <StatCard
             label="Master"
-            value={master ? master.node_id : "None"}
+            value={master ? `${master.host}:${master.port}` : "None"}
             sub={`priority ${master?.priority ?? "—"}`}
             color="border-yellow-500/30"
           />
@@ -87,7 +87,7 @@ export default function DashboardPage() {
                       return (
                         <tr key={entity} className="text-xs">
                           <td className="py-2 font-mono text-indigo-300">{entity}</td>
-                          <td className="py-2 font-mono text-gray-300">{nodeId}</td>
+                          <td className="py-2 font-mono text-gray-300">{node ? `${node.host}:${node.port}` : nodeId}</td>
                           <td className="py-2">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
                               node?.role === "master" ? "bg-yellow-500/20 text-yellow-300" : "bg-purple-500/20 text-purple-300"
@@ -138,7 +138,7 @@ export default function DashboardPage() {
                 )}
                 {metrics.map((n) => (
                   <tr key={n.node_id} className={n.status === "failed" ? "opacity-40" : ""}>
-                    <td className="py-2 pr-4 font-mono text-white">{n.node_id}</td>
+                    <td className="py-2 pr-4 font-mono text-white">{n.host}:{n.port}</td>
                     <td className="py-2 pr-4">
                       <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                         n.role === "master" ? "bg-yellow-500/20 text-yellow-300" : "bg-purple-500/20 text-purple-300"

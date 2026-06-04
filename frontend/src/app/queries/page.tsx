@@ -29,7 +29,7 @@ function Section({ title, icon, children }: { title: string; icon: React.ReactNo
 }
 
 export default function QueriesPage() {
-  const [joinId, setJoinId]   = useState("1");
+  const [joinId, setJoinId] = useState("1");
   const [joinRes, setJoinRes] = useState<Record<string, unknown> | null>(null);
   const [joinLoading, setJoinLoading] = useState(false);
 
@@ -43,14 +43,14 @@ export default function QueriesPage() {
   const [distLoading, setDistLoading] = useState(false);
 
   // Replication state
-  const [replMasterId,  setReplMasterId]  = useState("localhost:6379");
+  const [replMasterId, setReplMasterId] = useState("localhost:6379");
   const [replReplicaId, setReplReplicaId] = useState("10.108.135.244:7001");
-  const [replSetupRes,  setReplSetupRes]  = useState<Record<string, unknown> | null>(null);
+  const [replSetupRes, setReplSetupRes] = useState<Record<string, unknown> | null>(null);
   const [replSetupLoading, setReplSetupLoading] = useState(false);
-  const [replStopLoading,  setReplStopLoading]  = useState(false);
+  const [replStopLoading, setReplStopLoading] = useState(false);
   const [replStatusRes, setReplStatusRes] = useState<Record<string, unknown> | null>(null);
   const [replStatusLoading, setReplStatusLoading] = useState(false);
-  const [replDemoRes,   setReplDemoRes]   = useState<Record<string, unknown> | null>(null);
+  const [replDemoRes, setReplDemoRes] = useState<Record<string, unknown> | null>(null);
   const [replDemoLoading, setReplDemoLoading] = useState(false);
 
   async function runJoin() {
@@ -151,7 +151,7 @@ export default function QueriesPage() {
                 <div key={entity} className="flex items-center gap-3 text-xs">
                   <span className="w-36 font-mono text-indigo-300">{entity}</span>
                   <span className="text-gray-500">→</span>
-                  <NodeBadge nodeId={info.node_id} />
+                  <NodeBadge nodeId={`${info.host}:${info.port}`} />
                   <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${info.role === "master" ? "bg-yellow-500/20 text-yellow-300" : "bg-purple-500/20 text-purple-300"}`}>{info.role}</span>
                   <span className={`text-[10px] ${info.status === "healthy" ? "text-green-400" : "text-red-400"}`}>{info.status}</span>
                 </div>
@@ -195,12 +195,12 @@ export default function QueriesPage() {
                 <div className="rounded-lg border border-gray-700 p-3 space-y-1">
                   <p className="text-[10px] font-semibold text-gray-500 uppercase">Commande</p>
                   {joinRes.commande
-                    ? Object.entries(joinRes.commande as Record<string, unknown>).map(([k, v]) => (
-                        <div key={k} className="flex gap-2 text-xs">
-                          <span className="text-gray-500 w-32 shrink-0">{k}</span>
-                          <span className="text-white">{String(v)}</span>
-                        </div>
-                      ))
+                    ? Object.entries(joinRes.commande as Record<string, string | number | boolean>).map(([k, v]) => (
+                      <div key={k} className="flex gap-2 text-xs">
+                        <span className="text-gray-500 w-32 shrink-0">{k}</span>
+                        <span className="text-white">{String(v)}</span>
+                      </div>
+                    ))
                     : <p className="text-xs text-gray-600">Not found</p>
                   }
                 </div>
@@ -209,12 +209,12 @@ export default function QueriesPage() {
                 <div className="rounded-lg border border-gray-700 p-3 space-y-1">
                   <p className="text-[10px] font-semibold text-gray-500 uppercase">Client (JOIN)</p>
                   {joinRes.client
-                    ? Object.entries(joinRes.client as Record<string, unknown>).map(([k, v]) => (
-                        <div key={k} className="flex gap-2 text-xs">
-                          <span className="text-gray-500 w-32 shrink-0">{k}</span>
-                          <span className="text-white">{String(v)}</span>
-                        </div>
-                      ))
+                    ? Object.entries(joinRes.client as Record<string, string | number | boolean>).map(([k, v]) => (
+                      <div key={k} className="flex gap-2 text-xs">
+                        <span className="text-gray-500 w-32 shrink-0">{k}</span>
+                        <span className="text-white">{String(v)}</span>
+                      </div>
+                    ))
                     : <p className="text-xs text-gray-600">Client not found</p>
                   }
                 </div>
@@ -282,7 +282,7 @@ export default function QueriesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {(gbcRes.results as { client: Record<string,unknown>; nb_commandes: number; commandes: number[] }[])
+                  {(gbcRes.results as { client: Record<string, unknown>; nb_commandes: number; commandes: number[] }[])
                     .sort((a, b) => b.nb_commandes - a.nb_commandes)
                     .map((row, i) => (
                       <tr key={i} className="border-t border-gray-800/50">
@@ -329,7 +329,7 @@ export default function QueriesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {(gbaRes.results as { no_article: number; article: Record<string,unknown>|null; total_quantite_commandee: number }[])
+                  {(gbaRes.results as { no_article: number; article: Record<string, unknown> | null; total_quantite_commandee: number }[])
                     .map((row, i) => (
                       <tr key={i} className="border-t border-gray-800/50">
                         <td className="py-2 font-mono text-gray-300">{row.no_article}</td>
@@ -418,7 +418,7 @@ export default function QueriesPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <p className="font-semibold text-gray-400 uppercase text-[10px]">Write (Master)</p>
-                  {replDemoRes.write && Object.entries(replDemoRes.write as Record<string, unknown>).map(([k, v]) => (
+                  {Boolean(replDemoRes.write) && Object.entries(replDemoRes.write as Record<string, string | number | boolean>).map(([k, v]) => (
                     <div key={k} className="flex gap-2">
                       <span className="text-gray-500 w-16 shrink-0">{k}</span>
                       <span className="font-mono text-white text-[10px]">{String(v)}</span>
@@ -427,7 +427,7 @@ export default function QueriesPage() {
                 </div>
                 <div className="space-y-1">
                   <p className="font-semibold text-gray-400 uppercase text-[10px]">Read (Replica)</p>
-                  {replDemoRes.read && Object.entries(replDemoRes.read as Record<string, unknown>).map(([k, v]) => (
+                  {Boolean(replDemoRes.read) && Object.entries(replDemoRes.read as Record<string, string | number | boolean>).map(([k, v]) => (
                     <div key={k} className="flex gap-2">
                       <span className="text-gray-500 w-16 shrink-0">{k}</span>
                       <span className="font-mono text-white text-[10px]">{String(v)}</span>
@@ -435,7 +435,7 @@ export default function QueriesPage() {
                   ))}
                 </div>
               </div>
-              {replDemoRes.error && (
+              {Boolean(replDemoRes.error) && (
                 <p className="text-red-400 italic">{String(replDemoRes.error)}</p>
               )}
             </div>
@@ -444,7 +444,7 @@ export default function QueriesPage() {
           {replStatusRes && (
             <div className="space-y-2">
               <p className="text-[10px] font-semibold text-gray-500 uppercase">Node Replication Info</p>
-              {(replStatusRes.nodes as Record<string, unknown>[]).map((n, i) => (
+              {(replStatusRes.nodes as Record<string, any>[]).map((n, i) => (
                 <div key={i} className="rounded-lg border border-gray-800 p-3 text-xs space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-indigo-300">{String(n.node_id)}</span>

@@ -150,13 +150,8 @@ async def nodes_status():
     results = []
     for node in cluster_manager.get_all_nodes():
         t0 = time.time()
-        conn = cluster_manager._connections.get(node.node_id)
-        try:
-            if conn:
-                conn.ping()
-            connected = conn is not None and node.status == NodeStatus.HEALTHY
-        except Exception:
-            connected = False
+        # Rely on the cluster's internal state for health instead of a custom pool
+        connected = (node.status == NodeStatus.HEALTHY)
         ms = (time.time() - t0) * 1000
         results.append(
             HealthStatus(

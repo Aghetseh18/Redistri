@@ -12,9 +12,8 @@ import { RefreshCw, PlusCircle, RotateCcw } from "lucide-react";
 
 function Toast({ msg, ok }: { msg: string; ok: boolean }) {
   return (
-    <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-xl text-sm font-medium ${
-      ok ? "bg-green-600 text-white" : "bg-red-600 text-white"
-    }`}>{msg}</div>
+    <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-xl text-sm font-medium ${ok ? "bg-green-600 text-white" : "bg-red-600 text-white"
+      }`}>{msg}</div>
   );
 }
 
@@ -29,6 +28,8 @@ export default function ClusterPage() {
     setToast({ msg, ok });
     setTimeout(() => setToast(null), 3000);
   }
+
+  console.log(topology)
 
   async function handleFailover(id: string) {
     setLoading(id);
@@ -87,8 +88,18 @@ export default function ClusterPage() {
   }
 
   const nodes = topology?.nodes ?? [];
-  const masters  = nodes.filter((n) => n.role === "master");
+  const masters = nodes.filter((n) => n.role === "master");
   const replicas = nodes.filter((n) => n.role === "replica");
+  masters.forEach(n => {
+    n.repl = replicas.filter(r => r.replica_of == n.node_id)
+  });
+
+  replicas.forEach(r => {
+    r.master = masters.find(m => r.replica_of == m.node_id)
+  });
+  console.log('masters ', masters)
+  console.log('replicas', replicas)
+
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">

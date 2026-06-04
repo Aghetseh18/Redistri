@@ -4,16 +4,16 @@ import { Crown, Shield, Cpu, MemoryStick, Zap, Clock } from "lucide-react";
 import clsx from "clsx";
 
 const statusColor: Record<string, string> = {
-  healthy:  "bg-green-500/15 text-green-400 border-green-500/30",
+  healthy: "bg-green-500/15 text-green-400 border-green-500/30",
   degraded: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
-  failed:   "bg-red-500/15 text-red-400 border-red-500/30",
-  joining:  "bg-blue-500/15 text-blue-400 border-blue-500/30",
+  failed: "bg-red-500/15 text-red-400 border-red-500/30",
+  joining: "bg-blue-500/15 text-blue-400 border-blue-500/30",
 };
 const statusDot: Record<string, string> = {
-  healthy:  "bg-green-400",
+  healthy: "bg-green-400",
   degraded: "bg-yellow-400",
-  failed:   "bg-red-400",
-  joining:  "bg-blue-400",
+  failed: "bg-red-400",
+  joining: "bg-blue-400",
 };
 
 function fmt(s?: number) {
@@ -25,11 +25,12 @@ function fmt(s?: number) {
 
 interface Props {
   node: NodeInfo;
+  masterIp?: string;
   onFailover?: (id: string) => void;
   onRemove?: (id: string) => void;
 }
 
-export default function NodeCard({ node, onFailover, onRemove }: Props) {
+export default function NodeCard({ node, masterIp, onFailover, onRemove }: Props) {
   const isMaster = node.role === "master";
   const m = node.metrics ?? {};
 
@@ -50,9 +51,9 @@ export default function NodeCard({ node, onFailover, onRemove }: Props) {
             : <Shield size={15} className="text-purple-400 shrink-0" />
           }
           <div className="min-w-0">
-            <p className="font-mono text-sm font-semibold text-white truncate">{node.node_id}</p>
-            {node.replica_of && (
-              <p className="text-[10px] text-gray-500 truncate">replica of {node.replica_of}</p>
+            <p className="font-mono text-sm font-semibold text-white truncate">{node.host}:{node.port}</p>
+            {node.replica_of && node.master && (
+              <p className="text-[10px] text-gray-500 truncate">replica of  {node.master.host}:{node.master.port}</p>
             )}
           </div>
         </div>

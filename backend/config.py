@@ -28,12 +28,13 @@ BOOTSTRAP_NODES: List[Dict] = (
     _parse_env_nodes(_env)
     if _env
     else [
-        {"host": "localhost",      "port": 6379},  # master (this machine)
-        {"host": "10.108.135.244", "port": 7001},  # slave 1
-        {"host": "10.108.135.223", "port": 7002},  # slave 2 (note: ordered by IP group)
-        {"host": "10.108.135.175", "port": 7003},  # slave 3
-        {"host": "10.108.135.172", "port": 7004},  # slave 4
-        {"host": "10.108.135.139", "port": 7005},  # slave 5
+        {"host": "192.168.8.103", "port": 7001},  # master (this machine)
+        {"host": "192.168.8.102", "port": 7002},  # slave 1
+        {"host": "192.168.8.105", "port": 7003},  # slave 2 (note: ordered by IP group)
+        {"host": "192.168.8.100", "port": 7004},
+        {"host": "192.168.8.107", "port": 7005},
+        {"host": "192.168.8.106", "port": 7006},  # slave 3
+       
     ]
 )
 
